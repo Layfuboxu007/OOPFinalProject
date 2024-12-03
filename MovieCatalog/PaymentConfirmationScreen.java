@@ -2,66 +2,152 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.text.*;
 
 public class PaymentConfirmationScreen extends JFrame {
-    private Movie movie;
-    private String buyerName;
+    private String userName;
+    private String selectedMovie;
     private int ticketCount;
     private double totalAmount;
-    private java.util.List<String> selectedSeats;
 
-    public PaymentConfirmationScreen(Movie movie, String buyerName, int ticketCount, double totalAmount, java.util.List<String> selectedSeats) {
-        this.movie = movie;
-        this.buyerName = buyerName;
+    private JTextField paymentField;
+    private JLabel changeLabel;
+
+    public PaymentConfirmationScreen(String userName, String selectedMovie, int ticketCount, double totalAmount) {
+        this.userName = userName;
+        this.selectedMovie = selectedMovie;
         this.ticketCount = ticketCount;
         this.totalAmount = totalAmount;
-        this.selectedSeats = selectedSeats;
 
         setTitle("Payment Confirmation");
         setSize(400, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(6, 2));
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        // Buyer and movie details
-        JLabel buyerLabel = new JLabel("Buyer Name: " + buyerName);
-        JLabel movieLabel = new JLabel("Movie: " + movie.title);
-        JLabel ticketCountLabel = new JLabel("Tickets: " + ticketCount);
-        JLabel totalAmountLabel = new JLabel("Total Amount: PHP " + totalAmount);
-        JLabel seatsLabel = new JLabel("Seats: " + String.join(", ", selectedSeats));
+        
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Payment and final confirmation
-        JLabel paymentLabel = new JLabel("Payment Method:");
-        JComboBox<String> paymentMethodCombo = new JComboBox<>(new String[]{"Cash", "Credit Card", "Gcash"});
+        
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        mainPanel.add(new JLabel("Name:"), gbc);
+
+        gbc.gridx = 1;
+        mainPanel.add(new JLabel(userName), gbc);
+
+        
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        mainPanel.add(new JLabel("Movie:"), gbc);
+
+        gbc.gridx = 1;
+        mainPanel.add(new JLabel(selectedMovie), gbc);
+
+        
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        mainPanel.add(new JLabel("Tickets:"), gbc);
+
+        gbc.gridx = 1;
+        mainPanel.add(new JLabel(String.valueOf(ticketCount)), gbc);
+
+        
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        mainPanel.add(new JLabel("Total Amount:"), gbc);
+
+        gbc.gridx = 1;
+        mainPanel.add(new JLabel("PhP " + totalAmount), gbc);
+
+        
+        gbc.gridx = 0;
+        gbc.gridy = 4;
+        mainPanel.add(new JLabel("Amount Paid:"), gbc);
+
+        gbc.gridx = 1;
+        paymentField = new JTextField(15);
+        ((AbstractDocument) paymentField.getDocument()).setDocumentFilter(new DocumentFilter() {
+            @Override
+            public void insertString(FilterBypass fb, int offset, String string, AttributeSet attr) throws BadLocationException {
+                if (string.matches("[0-9]*\\.?[0-9]*")) {
+                    super.insertString(fb, offset, string, attr);
+                }
+            }
+
+            @Override
+            public void replace(FilterBypass fb, int offset, int length, String string, AttributeSet attrs) throws BadLocationException {
+                if (string.matches("[0-9]*\\.?[0-9]*")) {
+                    super.replace(fb, offset, length, string, attrs);
+                }
+            }
+        });
+        mainPanel.add(paymentField, gbc);
+
+        
+        gbc.gridx = 0;
+        gbc.gridy = 5;
+        mainPanel.add(new JLabel("Change:"), gbc);
+
+        gbc.gridx = 1;
+        changeLabel = new JLabel("PhP 0.00");
+        mainPanel.add(changeLabel, gbc);
+
+        add(mainPanel, BorderLayout.CENTER);
+
         JButton confirmButton = new JButton("Confirm Payment");
+        add(confirmButton, BorderLayout.SOUTH);
 
+        
         confirmButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String selectedPaymentMethod = (String) paymentMethodCombo.getSelectedItem();
-                JOptionPane.showMessageDialog(PaymentConfirmationScreen.this,
-                        "Payment Confirmed!\n" +
-                                "Buyer: " + buyerName + "\n" +
-                                "Movie: " + movie.title + "\n" +
-                                "Tickets: " + ticketCount + "\n" +
-                                "Total: PHP " + totalAmount + "\n" +
-                                "Seats: " + String.join(", ", selectedSeats) + "\n" +
-                                "Payment Method: " + selectedPaymentMethod,
-                        "Payment Success", JOptionPane.INFORMATION_MESSAGE);
-                dispose();
+                try {
+                    double amountPaid = Double.parseDouble(paymentField.getText().trim());
+
+                    if (amountPaid < totalAmount) {
+                        JOptionPane.showMessageDialog(
+                            PaymentConfirmationScreen.this,
+                            "Insufficient amount! Please enter a valid amount.",
+                            "Payment Error",
+                            JOptionPane.WARNING_MESSAGE
+                        );
+                        return;
+                    }
+
+                    
+                    double change = amountPaid - totalAmount;
+                    changeLabel.setText("PhP " + change);
+
+                    
+                    JOptionPane.showMessageDialog(
+                        PaymentConfirmationScreen.this,
+                        "Payment successful!",
+                        "Payment Successful",
+                        JOptionPane.INFORMATION_MESSAGE
+                    );
+
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(
+                        PaymentConfirmationScreen.this,
+                        "Invalid amount entered! Please enter a valid amount.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
             }
         });
 
-        // Add components to the frame
-        add(buyerLabel);
-        add(movieLabel);
-        add(ticketCountLabel);
-        add(totalAmountLabel);
-        add(seatsLabel);
-        add(paymentLabel);
-        add(paymentMethodCombo);
-        add(new JLabel()); // Spacer
-        add(confirmButton);
+        
+        paymentField.requestFocusInWindow();
 
         setVisible(true);
+    }
+
+    public static void main(String[] args) {
+        new PaymentConfirmationScreen("John Doe", "Avengers: Endgame", 3, 2250.0);
     }
 }

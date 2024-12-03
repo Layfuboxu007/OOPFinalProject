@@ -1,111 +1,110 @@
-   import javax.swing.*;
-   import java.awt.*;
-   import java.awt.event.ActionEvent;
-   import java.awt.event.ActionListener;
-   import java.util.ArrayList;
-   import java.util.List;
-   
-   class Movie {
-       String title;
-       double pricePerTicket;
-   
-       public Movie(String title, double pricePerTicket) {
-           this.title = title;
-           this.pricePerTicket = pricePerTicket;
-       }
-   
-       @Override
-       public String toString() {
-           return title + " (PHP " + pricePerTicket + ")";
-       }
-   }
-   
-   public class MovieCatalogScreen extends JFrame {
-       private Movie selectedMovie; // Track the selected movie
-   
-       public MovieCatalogScreen() {
-           setTitle("Movie Ticketing System - Movie Catalog");
-           setSize(500, 400);
-           setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-           setLayout(new BorderLayout());
-   
-           // Movie one
-           ImageIcon picOne = new ImageIcon("Avengers.jpg");
-           Image originalImageOne = picOne.getImage();
-           Image scaledImageOne = originalImageOne.getScaledInstance(100, 150, Image.SCALE_SMOOTH);
-           picOne = new ImageIcon(scaledImageOne);
-           JButton pictureOneButton = new JButton(picOne);
-           pictureOneButton.setBorderPainted(false);
-           pictureOneButton.setContentAreaFilled(false);
-           pictureOneButton.setFocusPainted(false);
-           
-           // Movie two
-           ImageIcon picTwo = new ImageIcon("Inception.jpg");
-           Image originalImageTwo = picTwo.getImage();
-           Image scaledImageTwo = originalImageTwo.getScaledInstance(100, 150, Image.SCALE_SMOOTH);
-           picTwo = new ImageIcon(scaledImageTwo);
-           JButton pictureTwoButton = new JButton(picTwo);
-           pictureTwoButton.setBorderPainted(false);
-           pictureTwoButton.setContentAreaFilled(false);
-           pictureTwoButton.setFocusPainted(false);
-           
-           // Movie three
-           ImageIcon picThree = new ImageIcon("Frozen.jpg");
-           Image originalImageThree = picThree.getImage();
-           Image scaledImageThree = originalImageThree.getScaledInstance(100, 150, Image.SCALE_SMOOTH);
-           picThree = new ImageIcon(scaledImageThree);
-           JButton pictureThreeButton = new JButton(picThree);
-           pictureThreeButton.setBorderPainted(false);
-           pictureThreeButton.setContentAreaFilled(false);
-           pictureThreeButton.setFocusPainted(false);
-           
-           // Add buttons to action listeners to select the movie
-           pictureOneButton.addActionListener(new ActionListener() {
-               @Override
-               public void actionPerformed(ActionEvent e) {
-                   selectedMovie = new Movie("Avengers", 200);
-               }
-           });
-   
-           pictureTwoButton.addActionListener(new ActionListener() {
-               @Override
-               public void actionPerformed(ActionEvent e) {
-                   selectedMovie = new Movie("Inception", 250);
-               }
-           });
-   
-           pictureThreeButton.addActionListener(new ActionListener() {
-               @Override
-               public void actionPerformed(ActionEvent e) {
-                   selectedMovie = new Movie("Frozen", 150);
-               }
-           });
-   
-           // Add the buttons to a JPanel
-           JPanel imagePanel = new JPanel();
-           imagePanel.add(pictureOneButton);
-           imagePanel.add(pictureTwoButton);
-           imagePanel.add(pictureThreeButton);
-           add(imagePanel, BorderLayout.CENTER);
-   
-           // "Book Selected Movie" button
-           JButton bookButton = new JButton("Book Selected Movie");
-   bookButton.addActionListener(new ActionListener() {
-       @Override
-       public void actionPerformed(ActionEvent e) {
-           // Check if a movie has been selected
-           if (selectedMovie != null) {
-               new BookingScreen(selectedMovie).setVisible(true); // Navigate to booking screen
-               dispose();
-           } else {
-               // Show an error if no movie is selected
-               JOptionPane.showMessageDialog(MovieCatalogScreen.this,
-                       "Please select a movie to book!", "Error", JOptionPane.ERROR_MESSAGE);
-           }
-       }
-   });
-           add(bookButton, BorderLayout.SOUTH);
-           setVisible(true);
-       }
-   }
-   
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class MovieCatalogScreen extends JFrame {
+
+    private String[] movieTitles = {
+        "Transformers One",
+        "Godzilla X Kong",
+        "Borderlands",
+        "Deadpool and Wolverine",
+        "Alien: Romulus"
+    };
+
+    private String[] movieDescriptions = {
+        "Transformers battle for supremacy in this epic adventure.",
+        "Godzilla and Kong face off for the ultimate showdown.",
+        "A post-apocalyptic world filled with crazy adventures.",
+        "Deadpool teams up with Wolverine in this action-packed film.",
+        "A chilling story set in space with deadly aliens."
+    };
+
+    private double[] ticketPrices = {750.0, 900.0, 600.0, 1000.0, 500.0};  // Prices in PhP
+
+    private JLabel imageLabel;
+
+    public MovieCatalogScreen() {
+        setTitle("Movie Catalog");
+        setSize(800, 600);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // center kay ambut nganu mu tiko ang window, nayabag.
+        setLocationRelativeTo(null);
+
+        JList<String> movieList = new JList<>(movieTitles);
+        movieList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        movieList.setVisibleRowCount(5);
+
+        JScrollPane scrollPane = new JScrollPane(movieList);
+        add(scrollPane, BorderLayout.WEST);
+
+        JPanel movieDetailsPanel = new JPanel();
+        movieDetailsPanel.setLayout(new BoxLayout(movieDetailsPanel, BoxLayout.Y_AXIS));
+
+        // ImagePanel para ma center, AYAW HILABTI, please.
+        JPanel imagePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        imageLabel = new JLabel();
+        imagePanel.add(imageLabel);
+        movieDetailsPanel.add(imagePanel);
+
+        JLabel titleLabel = new JLabel("Select a movie to see details.");
+        JLabel descriptionLabel = new JLabel("");
+        JLabel priceLabel = new JLabel("");
+        movieDetailsPanel.add(titleLabel);
+        movieDetailsPanel.add(descriptionLabel);
+        movieDetailsPanel.add(priceLabel);
+
+        add(movieDetailsPanel, BorderLayout.CENTER);
+
+        JButton bookButton = new JButton("Book Movie");
+        add(bookButton, BorderLayout.SOUTH);
+
+        bookButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedIndex = movieList.getSelectedIndex();
+                if (selectedIndex >= 0) {
+                    // sending selected movie index to booking screen, ayaw ilisdi please thanks.
+                    new BookingScreen(movieTitles[selectedIndex], ticketPrices[selectedIndex]).setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(
+                        MovieCatalogScreen.this,
+                        "Please select a movie first!",
+                        "No Movie Selected",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                }
+            }
+        });
+
+        movieList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedIndex = movieList.getSelectedIndex();
+                if (selectedIndex >= 0) {
+                    titleLabel.setText("Title: " + movieTitles[selectedIndex]);
+                    descriptionLabel.setText("Description: " + movieDescriptions[selectedIndex]);
+                    priceLabel.setText("Price: PhP " + ticketPrices[selectedIndex]);
+
+                    String imagePath = "C://Users//ahmad//OneDrive//Documents//MovieCatalog//Posters//" 
+                        + movieTitles[selectedIndex].replace(" ", "").replace(":", "_") + ".jpg";
+                    loadImage(imagePath);
+                }
+            }
+        });
+
+        setVisible(true);
+    }
+
+    private void loadImage(String imagePath) {
+        ImageIcon imageIcon = new ImageIcon(imagePath);
+        if (imageIcon.getImageLoadStatus() == MediaTracker.ERRORED) {
+            System.out.println("Error loading image at: " + imagePath);
+        } else {
+            Image image = imageIcon.getImage().getScaledInstance(200, 300, Image.SCALE_SMOOTH);
+            imageLabel.setIcon(new ImageIcon(image));
+        }
+    }
+}

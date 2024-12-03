@@ -3,93 +3,58 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-class User {
-    private final String username = "admin";
-    private final String password = "password";
-
-    public boolean login(String inputUser, String inputPass) {
-        return inputUser.equals(username) && inputPass.equals(password);
-    }
-}
-
 public class LoginScreen extends JFrame {
-    private JTextField usernameField;
-    private JPasswordField passwordField;
 
     public LoginScreen() {
-        setTitle("Movie Ticketing System - Login");
-        setSize(400, 250);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setTitle("Login");
+        setSize(400, 200);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5); // Add padding between components
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Username label
-        JLabel usernameLabel = new JLabel("Username:");
+        JLabel userLabel = new JLabel("Username:");
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.EAST; // Align to the right
-        add(usernameLabel, gbc);
+        add(userLabel, gbc);
 
-        // Username text field
-        usernameField = new JTextField(15);
+        JTextField userField = new JTextField(15);
         gbc.gridx = 1;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST; // Align to the left
-        add(usernameField, gbc);
+        add(userField, gbc);
 
-        // Password label
-        JLabel passwordLabel = new JLabel("Password:");
+        JLabel passLabel = new JLabel("Password:");
         gbc.gridx = 0;
         gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.EAST;
-        add(passwordLabel, gbc);
+        add(passLabel, gbc);
 
-        // Password text field
-        passwordField = new JPasswordField(15);
+        JPasswordField passField = new JPasswordField(15);
         gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-        add(passwordField, gbc);
+        add(passField, gbc);
 
-        // Login button
         JButton loginButton = new JButton("Login");
-        gbc.gridx = 1;
+        gbc.gridx = 0;
         gbc.gridy = 2;
-        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.gridwidth = 2;
         add(loginButton, gbc);
 
-        // Status label
-        JLabel statusLabel = new JLabel("", SwingConstants.CENTER);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2; // Span across two columns
-        gbc.anchor = GridBagConstraints.CENTER;
-        add(statusLabel, gbc);
-
-        // Button action
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                User user = new User();
-                String username = usernameField.getText();
-                String password = new String(passwordField.getPassword());
+                String username = userField.getText();
+                String password = new String(passField.getPassword());
 
-                if (user.login(username, password)) {
-                    statusLabel.setText("Login Successful!");
-                    new MovieCatalogScreen().setVisible(true);
+                if (username.equals("admin") && password.equals("password")) {
+                    JOptionPane.showMessageDialog(LoginScreen.this, "Login Successful!");
                     dispose();
+                    MovieCatalogScreen movieCatalog = new MovieCatalogScreen();
+                    movieCatalog.setVisible(true);
                 } else {
-                    statusLabel.setText("Invalid username or password!");
+                    JOptionPane.showMessageDialog(LoginScreen.this, "Invalid Credentials!");
                 }
             }
         });
-
-        setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        new LoginScreen();
     }
 }

@@ -2,68 +2,90 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class BookingScreen extends JFrame {
-    private JTextField buyerNameField;
+    private JLabel selectedMovieLabel;
+    private JTextField userNameField;
     private JSpinner ticketCountSpinner;
-    private JLabel totalAmountLabel;
+    private JLabel totalPriceLabel;
 
-    private Movie movie;
-    private double totalAmount;
+    private double ticketPrice;
 
-    public BookingScreen(Movie movie) {
-        this.movie = movie;
+    public BookingScreen(String selectedMovie, double ticketPrice) {
+        this.ticketPrice = ticketPrice;
 
-        setTitle("Movie Ticketing System - Booking");
-        setSize(500, 300);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new GridLayout(5, 2));
+        setTitle("Booking Screen");
+        setSize(400, 300);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
 
-        JLabel movieLabel = new JLabel("Movie: " + movie.title);
-        JLabel priceLabel = new JLabel("Price per Ticket: PHP " + movie.pricePerTicket);
+        selectedMovieLabel = new JLabel("Selected Movie: " + selectedMovie, JLabel.CENTER);
+        selectedMovieLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        add(selectedMovieLabel, BorderLayout.NORTH);
 
-        buyerNameField = new JTextField();
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new GridLayout(4, 2, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel ticketCountLabel = new JLabel("Number of Tickets:");
+        mainPanel.add(new JLabel("Your Name:"));
+        userNameField = new JTextField();
+        mainPanel.add(userNameField);
+
+        mainPanel.add(new JLabel("Amount of Tickets:"));
         ticketCountSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
-        ticketCountSpinner.addChangeListener(e -> updateTotalAmount());
+        mainPanel.add(ticketCountSpinner);
 
-        totalAmountLabel = new JLabel("Total Amount: PHP " + movie.pricePerTicket);
+        mainPanel.add(new JLabel("Price per Ticket:"));
+        JLabel ticketPriceLabel = new JLabel("PhP " + ticketPrice);
+        ticketPriceLabel.setForeground(new Color(0, 128, 0)); 
+        mainPanel.add(ticketPriceLabel);
 
-        JButton proceedButton = new JButton("Proceed to Payment");
-        proceedButton.addActionListener(new ActionListener() {
+        mainPanel.add(new JLabel("Total Price:"));
+        totalPriceLabel = new JLabel("PhP " + ticketPrice);
+        totalPriceLabel.setForeground(new Color(0, 128, 0)); 
+        mainPanel.add(totalPriceLabel);
+
+        add(mainPanel, BorderLayout.CENTER);
+
+        JButton proceedToSeatsButton = new JButton("Proceed to Seat Booking");
+        proceedToSeatsButton.setFont(new Font("Arial", Font.PLAIN, 14));
+        add(proceedToSeatsButton, BorderLayout.SOUTH);
+
+        ticketCountSpinner.addChangeListener(new ChangeListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
-                String buyerName = buyerNameField.getText();
+            public void stateChanged(ChangeEvent e) {
                 int ticketCount = (int) ticketCountSpinner.getValue();
-
-                if (buyerName.isEmpty()) {
-                    JOptionPane.showMessageDialog(BookingScreen.this,
-                            "Please enter buyer's name!", "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    new SeatSelectionScreen(movie, buyerName, ticketCount).setVisible(true);
-                    dispose();
-                }
+                double totalPrice = ticketCount * ticketPrice;
+                totalPriceLabel.setText("PhP " + totalPrice);
             }
         });
 
-        add(movieLabel);
-        add(priceLabel);
-        add(new JLabel("Buyer's Name:"));
-        add(buyerNameField);
-        add(ticketCountLabel);
-        add(ticketCountSpinner);
-        add(new JLabel(""));
-        add(totalAmountLabel);
-        add(new JLabel(""));
-        add(proceedButton);
+        proceedToSeatsButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String userName = userNameField.getText().trim();
+                if (userName.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                        BookingScreen.this,
+                        "Please enter your name.",
+                        "Missing Information",
+                        JOptionPane.WARNING_MESSAGE
+                    );
+                    return;
+                }
+
+                // info -> seatbooking
+                int ticketCount = (int) ticketCountSpinner.getValue();
+                double totalPrice = ticketCount * ticketPrice;
+
+                new SeatBookingScreen(userName, selectedMovie, ticketCount, totalPrice).setVisible(true);
+                dispose();
+            }
+        });
 
         setVisible(true);
-    }
-
-    private void updateTotalAmount() {
-        int ticketCount = (int) ticketCountSpinner.getValue();
-        totalAmount = ticketCount * movie.pricePerTicket;
-        totalAmountLabel.setText("Total Amount: PHP " + totalAmount);
     }
 }
